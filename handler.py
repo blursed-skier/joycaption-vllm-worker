@@ -11,7 +11,7 @@ VLLM_URL = "http://localhost:8000/v1/chat/completions"
 MODEL_NAME = os.environ.get("MODEL_NAME", "fancyfeast/llama-joycaption-beta-one-hf-llava")
 STARTUP_TIMEOUT = int(os.environ.get("STARTUP_TIMEOUT", "600"))  # 10 minutes default for cold start
 
-# vLLM configuration with environment variable overrides
+# vLLM flags - each can be overridden via RunPod env vars
 VLLM_DTYPE = os.environ.get("VLLM_DTYPE", "bfloat16")
 VLLM_MAX_MODEL_LEN = os.environ.get("VLLM_MAX_MODEL_LEN", "2048")
 VLLM_MAX_NUM_SEQS = os.environ.get("VLLM_MAX_NUM_SEQS", "96")
@@ -21,7 +21,7 @@ VLLM_ENABLE_PREFIX_CACHING = os.environ.get("VLLM_ENABLE_PREFIX_CACHING", "1") =
 VLLM_ENABLE_CHUNKED_PREFILL = os.environ.get("VLLM_ENABLE_CHUNKED_PREFILL", "1") == "1"
 VLLM_TRUST_REMOTE_CODE = os.environ.get("VLLM_TRUST_REMOTE_CODE", "1") == "1"
 VLLM_LIMIT_MM_PER_PROMPT = os.environ.get("VLLM_LIMIT_MM_PER_PROMPT", '{"image": 1}')  # Empty string to disable
-VLLM_EXTRA_ARGS = os.environ.get("VLLM_EXTRA_ARGS", "")  # Additional args as space-separated string
+VLLM_EXTRA_ARGS = os.environ.get("VLLM_EXTRA_ARGS", "")  # Additional args
 
 def start_vllm():
     """Start vLLM server in background"""
@@ -33,14 +33,19 @@ def start_vllm():
         "--model", MODEL_NAME,
         "--host", "0.0.0.0",
         "--port", "8000",
-        "--dtype", VLLM_DTYPE,
-        "--max-model-len", VLLM_MAX_MODEL_LEN,
-        "--max-num-seqs", VLLM_MAX_NUM_SEQS,
-        "--max-num-batched-tokens", VLLM_MAX_BATCHED_TOKENS,
-        "--gpu-memory-utilization", VLLM_GPU_UTIL,
     ]
 
-    # Optional flags
+    # Only add flags if they have a value (empty string = skip flag entirely)
+    if VLLM_DTYPE:
+        cmd.extend(["--dtype", VLLM_DTYPE])
+    if VLLM_MAX_MODEL_LEN:
+        cmd.extend(["--max-model-len", VLLM_MAX_MODEL_LEN])
+    if VLLM_MAX_NUM_SEQS:
+        cmd.extend(["--max-num-seqs", VLLM_MAX_NUM_SEQS])
+    if VLLM_MAX_BATCHED_TOKENS:
+        cmd.extend(["--max-num-batched-tokens", VLLM_MAX_BATCHED_TOKENS])
+    if VLLM_GPU_UTIL:
+        cmd.extend(["--gpu-memory-utilization", VLLM_GPU_UTIL])
     if VLLM_ENABLE_PREFIX_CACHING:
         cmd.append("--enable-prefix-caching")
     if VLLM_ENABLE_CHUNKED_PREFILL:

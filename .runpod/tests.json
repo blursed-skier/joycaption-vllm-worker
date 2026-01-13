@@ -37,7 +37,6 @@
       {"key": "STARTUP_TIMEOUT", "value": "120"},
       {"key": "VLLM_MAX_MODEL_LEN", "value": "512"},
       {"key": "VLLM_MAX_NUM_SEQS", "value": "8"},
-      {"key": "VLLM_MAX_BATCHED_TOKENS", "value": "4096"},
       {"key": "VLLM_GPU_UTIL", "value": "0.80"},
       {"key": "VLLM_LIMIT_MM_PER_PROMPT", "value": ""}
     ],
