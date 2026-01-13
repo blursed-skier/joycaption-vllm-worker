@@ -35,7 +35,7 @@
     "env": [
       {"key": "MODEL_NAME", "value": "HuggingFaceTB/SmolLM2-135M-Instruct"},
       {"key": "STARTUP_TIMEOUT", "value": "120"},
-      {"key": "VLLM_EXTRA_ARGS", "value": "--max-model-len 512 --max-num-seqs 8 --gpu-memory-utilization 0.80"}
+      {"key": "VLLM_EXTRA_ARGS", "value": "--dtype bfloat16 --max-model-len 512 --max-num-seqs 8 --gpu-memory-utilization 0.80 --trust-remote-code"}
     ],
     "allowedCudaVersions": ["12.9", "12.8", "12.7", "12.6", "12.5"]
   }

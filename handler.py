@@ -17,27 +17,15 @@ def start_vllm():
     print(f"Loading model: {MODEL_NAME}")
     print(f"Startup timeout: {STARTUP_TIMEOUT}s")
 
-    # Base command with JoyCaption-optimized defaults
+    # Minimal base - model, host, port only
     cmd = [
         "python", "-m", "vllm.entrypoints.openai.api_server",
         "--model", MODEL_NAME,
         "--host", "0.0.0.0",
         "--port", "8000",
-        "--dtype", "bfloat16",
-        "--max-model-len", "2048",
-        "--max-num-seqs", "96",
-        "--max-num-batched-tokens", "120000",
-        "--gpu-memory-utilization", "0.92",
-        "--enable-prefix-caching",
-        "--enable-chunked-prefill",
-        "--trust-remote-code",
     ]
 
-    # Add multimodal limit for vision models (JoyCaption)
-    if "joycaption" in MODEL_NAME.lower() or "llava" in MODEL_NAME.lower():
-        cmd.extend(["--limit-mm-per-prompt", '{"image": 1}'])
-
-    # Allow overrides/additions via VLLM_EXTRA_ARGS
+    # Add all other args from VLLM_EXTRA_ARGS
     if VLLM_EXTRA_ARGS:
         cmd.extend(VLLM_EXTRA_ARGS.split())
 
