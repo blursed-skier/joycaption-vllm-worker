@@ -10,45 +10,34 @@ import requests
 VLLM_URL = "http://localhost:8000/v1/chat/completions"
 MODEL_NAME = os.environ.get("MODEL_NAME", "fancyfeast/llama-joycaption-beta-one-hf-llava")
 STARTUP_TIMEOUT = int(os.environ.get("STARTUP_TIMEOUT", "600"))  # 10 minutes default for cold start
-
-# vLLM configuration with environment variable overrides
-VLLM_DTYPE = os.environ.get("VLLM_DTYPE", "bfloat16")
-VLLM_MAX_MODEL_LEN = os.environ.get("VLLM_MAX_MODEL_LEN", "2048")
-VLLM_MAX_NUM_SEQS = os.environ.get("VLLM_MAX_NUM_SEQS", "96")
-VLLM_MAX_BATCHED_TOKENS = os.environ.get("VLLM_MAX_BATCHED_TOKENS", "120000")
-VLLM_GPU_UTIL = os.environ.get("VLLM_GPU_UTIL", "0.92")
-VLLM_ENABLE_PREFIX_CACHING = os.environ.get("VLLM_ENABLE_PREFIX_CACHING", "1") == "1"
-VLLM_ENABLE_CHUNKED_PREFILL = os.environ.get("VLLM_ENABLE_CHUNKED_PREFILL", "1") == "1"
-VLLM_TRUST_REMOTE_CODE = os.environ.get("VLLM_TRUST_REMOTE_CODE", "1") == "1"
-VLLM_LIMIT_MM_PER_PROMPT = os.environ.get("VLLM_LIMIT_MM_PER_PROMPT", '{"image": 1}')  # Empty string to disable
-VLLM_EXTRA_ARGS = os.environ.get("VLLM_EXTRA_ARGS", "")  # Additional args as space-separated string
+VLLM_EXTRA_ARGS = os.environ.get("VLLM_EXTRA_ARGS", "")  # Override/add vLLM args
 
 def start_vllm():
     """Start vLLM server in background"""
     print(f"Loading model: {MODEL_NAME}")
     print(f"Startup timeout: {STARTUP_TIMEOUT}s")
 
+    # Base command with JoyCaption-optimized defaults
     cmd = [
         "python", "-m", "vllm.entrypoints.openai.api_server",
         "--model", MODEL_NAME,
         "--host", "0.0.0.0",
         "--port", "8000",
-        "--dtype", VLLM_DTYPE,
-        "--max-model-len", VLLM_MAX_MODEL_LEN,
-        "--max-num-seqs", VLLM_MAX_NUM_SEQS,
-        "--max-num-batched-tokens", VLLM_MAX_BATCHED_TOKENS,
-        "--gpu-memory-utilization", VLLM_GPU_UTIL,
+        "--dtype", "bfloat16",
+        "--max-model-len", "2048",
+        "--max-num-seqs", "96",
+        "--max-num-batched-tokens", "120000",
+        "--gpu-memory-utilization", "0.92",
+        "--enable-prefix-caching",
+        "--enable-chunked-prefill",
+        "--trust-remote-code",
     ]
 
-    # Optional flags
-    if VLLM_ENABLE_PREFIX_CACHING:
-        cmd.append("--enable-prefix-caching")
-    if VLLM_ENABLE_CHUNKED_PREFILL:
-        cmd.append("--enable-chunked-prefill")
-    if VLLM_TRUST_REMOTE_CODE:
-        cmd.append("--trust-remote-code")
-    if VLLM_LIMIT_MM_PER_PROMPT:
-        cmd.extend(["--limit-mm-per-prompt", VLLM_LIMIT_MM_PER_PROMPT])
+    # Add multimodal limit for vision models (JoyCaption)
+    if "joycaption" in MODEL_NAME.lower() or "llava" in MODEL_NAME.lower():
+        cmd.extend(["--limit-mm-per-prompt", '{"image": 1}'])
+
+    # Allow overrides/additions via VLLM_EXTRA_ARGS
     if VLLM_EXTRA_ARGS:
         cmd.extend(VLLM_EXTRA_ARGS.split())
 
