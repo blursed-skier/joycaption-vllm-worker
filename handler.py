@@ -1,15 +1,21 @@
 """JoyCaption vLLM Handler - Simple RunPod Serverless Worker"""
 
+import os
 import runpod
 import subprocess
+import sys
 import time
 import requests
 
 VLLM_URL = "http://localhost:8000/v1/chat/completions"
-MODEL_NAME = "fancyfeast/llama-joycaption-beta-one-hf-llava"
+MODEL_NAME = os.environ.get("MODEL_NAME", "fancyfeast/llama-joycaption-beta-one-hf-llava")
+STARTUP_TIMEOUT = int(os.environ.get("STARTUP_TIMEOUT", "600"))  # 10 minutes default for cold start
 
 def start_vllm():
     """Start vLLM server in background"""
+    print(f"Loading model: {MODEL_NAME}")
+    print(f"Startup timeout: {STARTUP_TIMEOUT}s")
+
     cmd = [
         "python", "-m", "vllm.entrypoints.openai.api_server",
         "--model", MODEL_NAME,
@@ -25,18 +31,40 @@ def start_vllm():
         "--trust-remote-code",
         "--limit-mm-per-prompt", '{"image": 1}',
     ]
-    subprocess.Popen(cmd)
 
-    for _ in range(120):
+    # Start vLLM with output visible for debugging
+    process = subprocess.Popen(
+        cmd,
+        stdout=sys.stdout,
+        stderr=sys.stderr,
+        bufsize=1
+    )
+
+    for i in range(STARTUP_TIMEOUT):
+        # Check if process crashed
+        if process.poll() is not None:
+            raise RuntimeError(f"vLLM process exited with code {process.returncode}")
+
         try:
             r = requests.get("http://localhost:8000/health", timeout=2)
             if r.ok:
-                print("vLLM server ready!")
+                print(f"vLLM server ready after {i+1}s!")
                 return True
-        except:
+        except requests.exceptions.ConnectionError:
+            # Server not up yet, this is expected during startup
             pass
+        except requests.exceptions.Timeout:
+            # Health check timed out, server may be busy loading
+            print(f"Health check timeout at {i+1}s, server may be loading model...")
+        except Exception as e:
+            # Unexpected error, log it but continue waiting
+            print(f"Health check error at {i+1}s: {type(e).__name__}: {e}")
+
         time.sleep(1)
-    raise RuntimeError("vLLM server failed to start")
+
+    # Timeout reached - kill the process and report failure
+    process.terminate()
+    raise RuntimeError(f"vLLM server failed to start within {STARTUP_TIMEOUT}s")
 
 print("Starting vLLM server...")
 start_vllm()
