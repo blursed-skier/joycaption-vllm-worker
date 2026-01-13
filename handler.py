@@ -33,13 +33,19 @@ def start_vllm():
         "--model", MODEL_NAME,
         "--host", "0.0.0.0",
         "--port", "8000",
-        "--dtype", VLLM_DTYPE,
-        "--max-model-len", VLLM_MAX_MODEL_LEN,
-        "--max-num-seqs", VLLM_MAX_NUM_SEQS,
-        "--max-num-batched-tokens", VLLM_MAX_BATCHED_TOKENS,
-        "--gpu-memory-utilization", VLLM_GPU_UTIL,
     ]
 
+    # Only add flags if they have a value (empty string = skip flag entirely)
+    if VLLM_DTYPE:
+        cmd.extend(["--dtype", VLLM_DTYPE])
+    if VLLM_MAX_MODEL_LEN:
+        cmd.extend(["--max-model-len", VLLM_MAX_MODEL_LEN])
+    if VLLM_MAX_NUM_SEQS:
+        cmd.extend(["--max-num-seqs", VLLM_MAX_NUM_SEQS])
+    if VLLM_MAX_BATCHED_TOKENS:
+        cmd.extend(["--max-num-batched-tokens", VLLM_MAX_BATCHED_TOKENS])
+    if VLLM_GPU_UTIL:
+        cmd.extend(["--gpu-memory-utilization", VLLM_GPU_UTIL])
     if VLLM_ENABLE_PREFIX_CACHING:
         cmd.append("--enable-prefix-caching")
     if VLLM_ENABLE_CHUNKED_PREFILL:
