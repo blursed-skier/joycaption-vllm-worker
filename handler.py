@@ -17,7 +17,6 @@ def start_vllm():
     print(f"Loading model: {MODEL_NAME}")
     print(f"Startup timeout: {STARTUP_TIMEOUT}s")
 
-    # Minimal base - model, host, port only
     cmd = [
         "python", "-m", "vllm.entrypoints.openai.api_server",
         "--model", MODEL_NAME,
@@ -25,7 +24,6 @@ def start_vllm():
         "--port", "8000",
     ]
 
-    # Add all other args from VLLM_EXTRA_ARGS
     if VLLM_EXTRA_ARGS:
         cmd.extend(VLLM_EXTRA_ARGS.split())
 
