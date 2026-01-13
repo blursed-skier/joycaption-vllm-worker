@@ -29,7 +29,7 @@ def start_vllm():
     print(f"Startup timeout: {STARTUP_TIMEOUT}s")
 
     cmd = [
-        "python", "-m", "vllm.entrypoints.openai.api_server",
+        "python3", "-m", "vllm.entrypoints.openai.api_server",
         "--model", MODEL_NAME,
         "--host", "0.0.0.0",
         "--port", "8000",
