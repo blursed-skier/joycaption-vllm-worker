@@ -1,4 +1,4 @@
-# RunPod vLLM Worker - Modified for JoyCaption with vLLM 0.10.2
+# RunPod vLLM Worker - Modified for JoyCaption with vLLM 0.11.0
 FROM nvidia/cuda:12.1.0-base-ubuntu22.04
 
 RUN apt-get update -y \
@@ -12,8 +12,8 @@ RUN --mount=type=cache,target=/root/.cache/pip \
     python3 -m pip install --upgrade pip && \
     python3 -m pip install --upgrade -r /requirements.txt
 
-# Install vLLM 0.10.2 (pinned for JoyCaption multimodal compatibility)
-RUN python3 -m pip install vllm==0.10.2
+# Install vLLM 0.11.0 (pinned for JoyCaption multimodal compatibility)
+RUN python3 -m pip install vllm==0.11.0
 
 # Setup for baked-in JoyCaption model
 ARG MODEL_NAME="fancyfeast/llama-joycaption-beta-one-hf-llava"
