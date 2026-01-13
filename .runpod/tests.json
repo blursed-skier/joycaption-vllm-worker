@@ -41,6 +41,6 @@
       {"key": "VLLM_GPU_UTIL", "value": "0.80"},
       {"key": "VLLM_LIMIT_MM_PER_PROMPT", "value": ""}
     ],
-    "allowedCudaVersions": ["12.9", "12.8", "12.7", "12.6", "12.5"]
+    "allowedCudaVersions": ["12.9", "12.8", "12.7", "12.6", "12.5", "12.4"]
   }
 }
