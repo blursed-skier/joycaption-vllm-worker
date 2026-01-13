@@ -100,10 +100,9 @@ def handler(job):
             payload = job_input["openai_input"]
         elif "messages" in job_input:
             payload = job_input
-        else:
-            image_b64 = job_input.get("image")
-            if not image_b64:
-                return {"error": "Missing 'image' in input"}
+        elif "image" in job_input:
+            # JoyCaption image captioning format
+            image_b64 = job_input["image"]
             prompt = job_input.get("prompt", "Write a detailed description of this image.")
             payload = {
                 "model": MODEL_NAME,
@@ -118,6 +117,20 @@ def handler(job):
                 "temperature": job_input.get("temperature", 0.7),
                 "top_p": 0.9
             }
+        elif "prompt" in job_input:
+            # Simple text-only prompt format (for testing with text models)
+            payload = {
+                "model": MODEL_NAME,
+                "messages": [{
+                    "role": "user",
+                    "content": job_input["prompt"]
+                }],
+                "max_tokens": job_input.get("max_tokens", 250),
+                "temperature": job_input.get("temperature", 0.7),
+                "top_p": 0.9
+            }
+        else:
+            return {"error": "Missing required input: 'openai_input', 'messages', 'image', or 'prompt'"}
 
         if "model" not in payload:
             payload["model"] = MODEL_NAME
