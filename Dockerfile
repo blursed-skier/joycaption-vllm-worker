@@ -11,4 +11,6 @@ ENV MODEL_NAME=fancyfeast/llama-joycaption-beta-one-hf-llava \
 
 COPY handler.py /handler.py
 
+# Clear vLLM's entrypoint so we can run our handler
+ENTRYPOINT []
 CMD ["python", "-u", "/handler.py"]
