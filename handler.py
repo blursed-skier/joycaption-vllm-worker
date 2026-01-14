@@ -70,7 +70,7 @@ def start_vllm():
     logger.info(f"Max concurrency: {MAX_CONCURRENCY}")
 
     cmd = [
-        "vllm", "serve",
+        "vllm", "serve", MODEL_NAME,
         
         "--host", "0.0.0.0",
         "--port", "8000",
